@@ -43,7 +43,7 @@ export function createPlayback(onTime: (displayTimeMs: number) => void, duration
     if (!playing) return;
     if (token !== generation) return;
     const priorTime = displayTimeMs;
-    if (previous !== undefined) displayTimeMs += (now - previous) * speed;
+    if (previous !== undefined) displayTimeMs += (now - previous) * speed * Math.max(1, durationMs / 30_000);
     previous = now;
     const gap = gaps.find((item) => (priorTime < item.start && displayTimeMs >= item.start) || (displayTimeMs >= item.start && displayTimeMs < item.end));
     if (gap) { displayTimeMs = gap.start; playing = false; onPlaying(false); }
@@ -54,8 +54,8 @@ export function createPlayback(onTime: (displayTimeMs: number) => void, duration
   return {
     get time() { return displayTimeMs; }, get isPlaying() { return playing; },
     seek(time: number) { displayTimeMs = Math.max(0, Math.min(durationMs, time)); onTime(displayTimeMs); },
-    toggle() { playing = !playing; previous = undefined; generation += 1; onPlaying(playing); if (playing) { const token = generation; raf = requestAnimationFrame((now) => { if (token === generation) tick(now); }); } },
+    toggle() { if (!playing && displayTimeMs >= durationMs) displayTimeMs = 0; playing = !playing; previous = undefined; generation += 1; onPlaying(playing); if (playing) { const token = generation; raf = requestAnimationFrame((now) => { if (token === generation) tick(now); }); } },
     setSpeed(value: 0.5 | 1 | 2 | 4) { speed = value; },
-    dispose() { cancelAnimationFrame(raf); }
+    dispose() { playing = false; generation += 1; cancelAnimationFrame(raf); }
   };
 }

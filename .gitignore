@@ -8,4 +8,5 @@ playwright-report/
 .worktrees/
 .superpowers/
 data/raw/
+data/cache/
 public/scenarios/*/tiles/

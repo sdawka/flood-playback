@@ -12,3 +12,6 @@
 - 2026-09-11T16:34:14-04:00 — Execute the implementation plan with subagent-driven development, using Luna agents for bounded deterministic work and Terra agents for integration and review work.
 - 2026-09-12T07:49:39-04:00 — Run GitHub CLI commands directly without RTK wrapping. This keeps GitHub authentication and repository operations on their native CLI path.
 - 2026-09-12T07:56:34-04:00 — Publish the public repository as a sanitized, squashed snapshot instead of exposing the complete development history. This keeps internal review and unresolved acquisition artifacts local.
+- 2026-09-12T18:06:52-04:00 — Replace this checkout's old source-and-planning-only main branch with the merged public remote main, while retaining the prior local tip as a recovery branch. The merged repository contains the runnable flood viewer.
+- 2026-09-12T18:26:30-04:00 — Use Terra coders for the next implementation pass and deliver a professional application.
+- 2026-09-12T18:47:07-04:00 — Combine the available NASA observations for smoother playback; generating interpolated frames is acceptable.

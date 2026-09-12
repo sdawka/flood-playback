@@ -5,6 +5,7 @@
   export let sample: DepthSample | undefined;
   export let beforeTime: string;
   export let afterTime: string;
+  const formatTime = (stamp: string) => new Date(stamp).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
 </script>
 
 <aside class="depth-popup" aria-live="polite" aria-label="Depth inspection">
@@ -12,7 +13,7 @@
   <div>{latitude.toFixed(5)}, {longitude.toFixed(5)}</div>
   {#if sample?.kind === 'depth'}<div>{sample.meters.toFixed(2)} m {sample.exact ? '(exact snapshot)' : '(interpolated)'}</div>
   {:else}<div>{sample?.reason ?? 'Loading depth data…'}</div>{/if}
-  <small>Between {new Date(beforeTime).toLocaleString()} and {new Date(afterTime).toLocaleString()}</small>
+  <small>{beforeTime === afterTime ? formatTime(beforeTime) : `${formatTime(beforeTime)} – ${formatTime(afterTime)}`} (India time)</small>
 </aside>
 
-<style>.depth-popup{position:absolute;z-index:2;left:.75rem;bottom:.75rem;max-width:20rem;padding:.6rem .75rem;background:#fffffff2;border:1px solid #335;color:#10233b;box-shadow:0 2px 8px #0003}.depth-popup small{display:block;margin-top:.35rem}</style>
+<style>.depth-popup{position:absolute;z-index:2;left:14px;bottom:38px;max-width:min(300px,calc(100% - 65px));padding:14px 16px;background:#fffffff5;border:1px solid #bdd5dc;border-radius:8px;color:#173b49;box-shadow:0 4px 16px #173b4920;font-size:13px;line-height:1.65}.depth-popup strong{display:block;margin-bottom:3px}.depth-popup small{display:block;margin-top:6px;font-size:10px;color:#546b75}</style>
