@@ -23,6 +23,7 @@
   let container: HTMLDivElement;
   let map: MapLibreMap | undefined;
   let loaded = false;
+  let mapError = '';
   let cachedTiles = new Map<string, DepthTile>();
   let lastValidFrame: { before: string; after: string; fraction: number } | undefined;
   let restoring = false;
@@ -188,8 +189,19 @@
   }
 
   onMount(() => {
-    map = createMap(container, manifest, regionId);
+    try { map = createMap(container, manifest, regionId); }
+    catch { mapError = 'The map could not start. Check that WebGL is enabled in your browser.'; return; }
+    const loadingTimeout = window.setTimeout(() => {
+      if (!loaded) mapError = 'The basemap is taking too long to load. Check your connection and retry.';
+    }, 15_000);
+    map.on('error', () => {
+      if (!loaded) mapError = 'The basemap could not load. Check your connection and retry.';
+    });
+    const resize = new ResizeObserver(() => map?.resize());
+    resize.observe(container);
     map.once('load', () => {
+      clearTimeout(loadingTimeout);
+      mapError = '';
       map!.on('click', (event) => inspect(event.lngLat.lng, event.lngLat.lat));
       map!.on('moveend', () => {
         applyFrames();
@@ -217,7 +229,7 @@
       });
       loaded = true;
     });
-    return () => { inspectionRequest?.abort(); prefetchRequests.reset(); frameProbeRequests.reset(); map?.remove(); };
+    return () => { clearTimeout(loadingTimeout); resize.disconnect(); inspectionRequest?.abort(); prefetchRequests.reset(); frameProbeRequests.reset(); map?.remove(); };
   });
 
   $: if (map && loaded) {
@@ -230,8 +242,9 @@
 
 <div class="map-shell">
   <div class="flood-map" bind:this={container} aria-label="Flood depth map"></div>
+  {#if !loaded}<div class="map-loading" role="status"><strong>{mapError ? 'Map unavailable' : 'Loading Assam map…'}</strong><p>{mapError || 'Loading geography and flood snapshots'}</p>{#if mapError}<button type="button" on:click={() => window.location.reload()}>Retry map</button>{/if}</div>{/if}
   <button class="inspect-center" type="button" disabled={!loaded} on:click={() => { const center = map?.getCenter(); if (center) void inspect(center.lng, center.lat); }}>Inspect map center</button>
   {#if unavailable}<div class="unavailable-overlay" role="status">Flood depth unavailable for this frame. <button type="button" on:click={retryFrame}>Retry frame</button></div>{/if}
 </div>
 
-<style>.map-shell{position:relative}.inspect-center{position:absolute;z-index:4;left:.75rem;top:.75rem}.unavailable-overlay{position:absolute;inset:0;z-index:3;display:grid;place-content:center;gap:.6rem;text-align:center;color:#2d2200;background:repeating-linear-gradient(-45deg,#fff5c4cc,#fff5c4cc 8px,#f8e3a1cc 8px,#f8e3a1cc 16px)}</style>
+<style>.map-shell{position:relative}.map-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:30px;text-align:center;background:#edf3f4;z-index:5}.map-loading p{max-width:350px;font-size:13px;line-height:1.6;color:#546b75}.inspect-center{position:absolute;z-index:4;left:14px;top:14px;font-size:12px;box-shadow:0 2px 8px #173b4915}.unavailable-overlay{position:absolute;inset:0;z-index:3;display:grid;place-content:center;gap:.6rem;text-align:center;color:#2d2200;background:repeating-linear-gradient(-45deg,#fff5c4cc,#fff5c4cc 8px,#f8e3a1cc 8px,#f8e3a1cc 16px)}</style>

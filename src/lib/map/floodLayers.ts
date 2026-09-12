@@ -60,7 +60,7 @@ function addFloodLayer(map: FloodMapAdapter, manifest: ScenarioManifest, region:
     minzoom: region.minZoom,
     maxzoom: region.maxZoom,
     tileSize: 256,
-    attribution: manifest.attribution.join(' '),
+    attribution: 'Synthetic flood scenario',
     rasterResampling: 'nearest'
   });
   const firstLabel = map.getStyle?.().layers?.find((layer) => layer.type === 'symbol')?.id;

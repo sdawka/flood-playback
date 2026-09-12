@@ -1,8 +1,13 @@
-import { Map as MapLibreMap, NavigationControl, type Map } from 'maplibre-gl';
+import { Map as MapLibreMap, NavigationControl, setWorkerUrl, type Map } from 'maplibre-gl';
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import type { ScenarioManifest } from '../scenario/types';
 import { setTerrainMode, type FloodMapAdapter } from './floodLayers';
 
 const BASEMAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
+
+// Vite relocates the main module during dependency optimization. Resolve the
+// separate MapLibre 6 worker as an asset in both development and production.
+setWorkerUrl(workerUrl);
 
 export function createMap(container: HTMLElement, manifest: ScenarioManifest, regionId: string): Map {
   const region = manifest.regions.find((item) => item.id === regionId);

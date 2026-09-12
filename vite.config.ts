@@ -5,6 +5,6 @@ export default defineConfig({
   plugins: [svelte()],
   test: {
     environment: 'jsdom',
-    exclude: ['tests/**', 'node_modules/**']
+    include: ['src/**/*.test.ts', 'pipeline/**/*.test.ts']
   }
 });

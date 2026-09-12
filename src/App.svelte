@@ -15,6 +15,7 @@
   import StatusNotice from './lib/components/StatusNotice.svelte';
   import { bracketTime, createPlayback } from './lib/playback/playback';
   import { terrainEnabledForRegion } from './lib/map/terrainAvailability';
+  import './app.css';
 
   let manifest: ScenarioManifest | undefined;
   let error = '';
@@ -60,15 +61,20 @@
       if (!request.signal.aborted) error = reason instanceof Error ? reason.message : 'Scenario manifest could not be loaded';
     }
   }
-  onMount(() => { void load(); return () => activeRequest?.abort(); });
+  onMount(() => { void load(); return () => { activeRequest?.abort(); controller?.dispose(); }; });
 </script>
 
 <main>
-  <h1>Northeast India Flood Playback</h1>
+  <header class="app-header">
+    <div class="brand"><svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M3 10c5-7 9 7 14 0s9 7 12 0M3 17c5-7 9 7 14 0s9 7 12 0M3 24c5-7 9 7 14 0s9 7 12 0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg><div><h1>Flood playback</h1><span>Northeast India / Assam</span></div></div>
+    <span class="scenario-badge">Synthetic demonstration</span>
+  </header>
   {#if manifest}
-    <p role="status">{manifest.disclosure}</p>
-    <p class="attribution">{manifest.attribution.join(' ')}</p>
+    <section class="workspace" aria-label="Explore flood scenario">
+    <div class="toolbar">
     <MapControls regions={manifest.regions} {regionId} {terrain} {terrainAvailable} onRegionChange={(next) => { regionId = next; terrain = false; terrainAvailable = terrainEnabledForRegion(next, Boolean(manifest?.regions.find((region) => region.id === next)?.terrainTiles), failedTerrainRegions); notice = ''; retryNotice = undefined; inspection = undefined; }} onTerrainChange={(enabled) => terrain = enabled} />
+    <span class="map-hint">Click the map to inspect depth</span>
+    </div>
     {#key regionId}
       <div class="map-wrap">
         <FloodMap {manifest} {regionId} {beforeFrame} {afterFrame} {fraction} {nextVisibleFrame} {terrain} onInspect={(detail: typeof inspection extends infer T ? Exclude<T, undefined> : never) => { inspection = detail; notice = ''; retryNotice = undefined; }} onTileError={(detail) => { notice = detail.message; retryNotice = detail.retry; }} onTerrainUnavailable={() => { terrain = false; terrainAvailable = false; failedTerrainRegions = new Set([...failedTerrainRegions, regionId]); notice = '3D terrain is unavailable; 2D map remains active.'; retryNotice = undefined; }} onFrameReady={() => { notice = ''; retryNotice = undefined; }} />
@@ -76,17 +82,19 @@
       </div>
     {/key}
     {#if notice}<StatusNotice message={notice} retry={retryNotice} />{/if}
-    <DepthLegend unit={manifest.depth.unit} />
+    <div class="playback-panel">
+    <div class="playback-heading"><div><h2>Watch the water change</h2><p>1–2 June 2026 · 8 snapshots · 30-second playback</p></div><DepthLegend unit={manifest.depth.unit} /></div>
     <Timeline timestamps={manifest.timestamps.map((item) => item.time)} gaps={manifest.gaps} {durationMs} timeMs={displayTimeMs} {playing} {speed}
       on:seek={(event) => { displayTimeMs = event.detail.timeMs; controller?.seek(displayTimeMs); }}
       on:toggle={() => controller?.toggle()}
       on:speed={(event) => { speed = event.detail.multiplier; controller?.setSpeed(speed); }} />
     {#if bracket?.kind === 'gap'}<p role="status">Flood layers unavailable for this interval.</p>{/if}
+    </div>
+    </section>
+    <footer><p role="status">{manifest.disclosure}</p><details><summary>About this scenario</summary><p>{manifest.attribution.join(' ')} Flood depths and terrain are illustrative. The basemap shows real geography.</p></details></footer>
   {:else if error}
     <StatusNotice message={error} retry={() => { void load(); }} />
   {:else}
     <p role="status">Loading scenario…</p>
   {/if}
 </main>
-
-<style>.map-wrap{position:relative}.attribution{font-size:.875rem;color:#334}</style>

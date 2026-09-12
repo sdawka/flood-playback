@@ -1,12 +1,12 @@
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
 .flood-map {
-  min-height: 30rem;
+  height: clamp(340px, calc(100dvh - 400px), 820px);
   width: 100%;
-  border-radius: 0.75rem;
   overflow: hidden;
-  box-shadow: 0 1rem 2.5rem rgb(7 29 50 / 20%);
 }
+
+@media(max-width:650px){.flood-map{height:clamp(280px,40dvh,550px)}}
 
 .map-shell:focus-within .flood-map {
   outline: 3px solid #0d4d75;

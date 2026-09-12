@@ -4,6 +4,22 @@ import { bracketTime, createPlayback, frameBeforeGap, interpolateDepth } from '.
 const times = ['2024-06-01T00:00:00Z', '2024-06-01T01:00:00Z', '2024-06-01T02:00:00Z'];
 
 describe('playback timeline math', () => {
+  it('plays a 42-hour scenario in 30 seconds and can replay after the end', () => {
+    let callback: FrameRequestCallback | undefined;
+    vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) => { callback = fn; return 1; });
+    try {
+      const duration = 42 * 3_600_000;
+      const controller = createPlayback(() => {}, duration);
+      controller.toggle(); callback?.(0); callback?.(15_000);
+      expect(controller.time).toBe(duration / 2);
+      callback?.(30_000);
+      expect(controller.time).toBe(duration);
+      expect(controller.isPlaying).toBe(false);
+      controller.toggle(); callback?.(40_000);
+      expect(controller.time).toBe(0);
+      expect(controller.isPlaying).toBe(true);
+    } finally { vi.unstubAllGlobals(); }
+  });
   it('brackets exact first and last timestamps', () => {
     expect(bracketTime(times, 0, [])).toEqual({ kind: 'exact', index: 0 });
     expect(bracketTime(times, 7_200_000, [])).toEqual({ kind: 'exact', index: 2 });
