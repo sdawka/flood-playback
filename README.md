@@ -1,8 +1,12 @@
 # Flood Playback
 
-Explore satellite-observed flooding in Assam and nearby northeast India during June 2022. The default viewer loads NASA GIBS MODIS flood classifications and false-color satellite imagery, with daily playback, region navigation, and layer opacity controls.
+Explore flooding in Assam and nearby northeast India during June 2022. The default viewer plays a locally generated sequence combining NASA GIBS MODIS observations, with original flood imagery and online false-color satellite imagery available for comparison.
 
-Flood imagery uses a rolling three-day observation window. These are categorical observations, not water-depth measurements or a forecast. Clouds and insufficient observations can hide water; transparent imagery must not be interpreted as dry land. Playback steps through dated imagery without interpolating classes.
+NASA flood imagery uses a rolling three-day observation window. These are categorical observations, not water-depth measurements or a forecast. Clouds and insufficient observations can hide water; transparent imagery must not be interpreted as dry land.
+
+Combined playback preserves each day's valid observations and fills missing pixels only from the latest original observation in the preceding two days. Unresolved gaps use a faint hatch. Generated six-hour frames visually blend adjacent combined maps using premultiplied alpha; they do not estimate hydraulic motion or water depth. Combined and interpolated frames are explicitly labeled **derived**. Original mosaics, source hashes, and per-pixel age maps remain in the sequence bundle for comparison and provenance.
+
+The local bundle covers northeast India at GIBS Web Mercator zoom 8, an overview representation of the MODIS product. Playback preloads nearby images and keeps the current frame visible until its replacement is ready. The geographic basemap and satellite mode still require an internet connection.
 
 The older synthetic depth demonstration remains available at `/?demo=synthetic` for testing the depth-raster pipeline. It is not the default viewer.
 
@@ -12,7 +16,9 @@ The older synthetic depth demonstration remains available at `/?demo=synthetic` 
 - [NASA flood classifications](https://gibs.earthdata.nasa.gov/colormaps/v1.3/output/MODIS_Flood.html) and [June 2022 event context](https://science.nasa.gov/earth/earth-observatory/floods-swamp-bangladesh-150014/).
 - Geographic basemap: OpenFreeMap, OpenMapTiles, and OpenStreetMap contributors.
 
-We acknowledge imagery provided by NASA's Global Imagery Browse Services (GIBS), part of its Earth Science Data and Information System (ESDIS). An internet connection is required to load imagery and basemap tiles.
+We acknowledge imagery provided by NASA's Global Imagery Browse Services (GIBS), part of its Earth Science Data and Information System (ESDIS).
+
+To rebuild the sequence, install `numpy` and `Pillow`, then run `python3 pipeline/build_observation_sequence.py --download`. Downloads are restricted to the June 12–30, 2022 area, cached under ignored `data/cache/nasa-gibs`, and capped at 64 MiB per run. Subsequent builds can omit `--download` and reuse the cache. The published sequence and its method are described by `public/observations/assam-june-2022/manifest.json`.
 
 ## Run locally
 
@@ -28,7 +34,7 @@ npm test
 npm run check
 npm run build
 npm run test:e2e
-python3 -m unittest pipeline.test_build_fixture
+python3 -m unittest pipeline.test_build_fixture pipeline.test_observation_sequence
 ```
 
 See [the design specification](docs/superpowers/specs/2026-09-11-flood-playback-design.md) for the scenario and tile contracts.

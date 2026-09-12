@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import 'maplibre-gl/dist/maplibre-gl.css';
-  import { DATES, REGIONS, createObservationMap, type MapStatus, type Product, type RegionId } from './gibs';
+  import { COMBINED_DATES, DATES, REGIONS, createObservationMap, type MapStatus, type Product, type RegionId } from './gibs';
   import './observations.css';
 
   const speeds = [
@@ -11,27 +11,36 @@
   ] as const;
 
   let mapElement: HTMLDivElement;
-  let product: Product = 'flood';
+  let product: Product = 'combined';
   let regionId: RegionId = 'brahmaputra';
-  let requestedIndex = DATES.indexOf('2022-06-24');
+  let requestedIndex = COMBINED_DATES.indexOf('2022-06-24T00:00:00Z');
   let shownDate = '';
   let opacity = 0.8;
   let playing = false;
   let intervalMs: (typeof speeds)[number]['value'] = speeds[1].value;
-  let status: MapStatus = { phase: 'loading', message: 'Preparing daily observations…', date: DATES[requestedIndex], product };
+  let status: MapStatus = { phase: 'loading', message: 'Preparing combined sequence…', date: COMBINED_DATES[requestedIndex], product };
   let sourceOpen = true;
   let layersOpen = true;
   let observationMap: ReturnType<typeof createObservationMap> | undefined;
   let playTimer: ReturnType<typeof setTimeout> | undefined;
+  let lastAdvanceAt = 0;
 
-  $: requestedDate = DATES[requestedIndex];
+  $: activeDates = product === 'combined' ? COMBINED_DATES : DATES;
+  $: requestedDate = activeDates[requestedIndex];
   $: frameKey = `${requestedDate}/${product}/${opacity}`;
   $: if (observationMap && frameKey) requestFrame();
   $: currentFrameReady = status.phase === 'ready' && status.date === requestedDate && status.product === product;
   $: if (status.phase === 'error' && playing) stopPlayback();
 
   function formatDate(date: string) {
-    return new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${date}T00:00:00Z`));
+    return new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', ...(date.includes('T') ? { hour: '2-digit' as const, minute: '2-digit' as const } : { year: 'numeric' as const }), timeZone: 'UTC' }).format(new Date(date.includes('T') ? date : `${date}T00:00:00Z`));
+  }
+
+  function selectProduct(next: Product) {
+    const day = requestedDate.slice(0, 10);
+    stopPlayback();
+    product = next;
+    requestedIndex = (next === 'combined' ? COMBINED_DATES : DATES).findIndex(date => date.startsWith(day));
   }
 
   function requestFrame() {
@@ -41,7 +50,8 @@
   }
 
   function setDate(index: number, pause = true) {
-    requestedIndex = Math.max(0, Math.min(DATES.length - 1, index));
+    requestedIndex = Math.max(0, Math.min(activeDates.length - 1, index));
+    lastAdvanceAt = performance.now();
     if (pause) stopPlayback();
   }
 
@@ -61,12 +71,12 @@
     if (!playing || status.phase !== 'ready') return;
     playTimer = setTimeout(() => {
       if (!playing || status.phase !== 'ready') return;
-      if (requestedIndex >= DATES.length - 1) {
+      if (requestedIndex >= activeDates.length - 1) {
         stopPlayback();
         return;
       }
       setDate(requestedIndex + 1, false);
-    }, intervalMs);
+    }, Math.max(0, intervalMs / (product === 'combined' ? 4 : 1) - (performance.now() - lastAdvanceAt)));
   }
 
   function togglePlayback() {
@@ -75,7 +85,8 @@
       return;
     }
     if (status.phase === 'error') return;
-    if (requestedIndex >= DATES.length - 1) requestedIndex = 0;
+    if (requestedIndex >= activeDates.length - 1) requestedIndex = 0;
+    lastAdvanceAt = performance.now();
     playing = true;
     if (status.phase === 'ready') scheduleNext();
   }
@@ -83,9 +94,9 @@
   function resetView() {
     stopPlayback();
     regionId = 'brahmaputra';
-    product = 'flood';
+    product = 'combined';
     opacity = 0.8;
-    requestedIndex = DATES.indexOf('2022-06-24');
+    requestedIndex = COMBINED_DATES.indexOf('2022-06-24T00:00:00Z');
     observationMap?.fitRegion('brahmaputra');
   }
 
@@ -120,7 +131,7 @@
       <span>Flood atlas</span>
       <span>NASA / MODIS observations</span>
     </div>
-    <p>{#if product === 'flood'}Terra + Aqua <span aria-hidden="true">·</span> daily 250 m classifications{:else}Terra / MODIS <span aria-hidden="true">·</span> false-color reflectance{/if}</p>
+    <p>{#if product === 'combined'}NASA observations <span aria-hidden="true">·</span> derived visual sequence{:else if product === 'flood'}Terra + Aqua <span aria-hidden="true">·</span> original flood observations{:else}Terra / MODIS <span aria-hidden="true">·</span> false-color reflectance{/if}</p>
     <button class="reset-button" type="button" on:click={resetView}>Reset view</button>
   </header>
 
@@ -130,8 +141,8 @@
     <aside class="map-panel" aria-label="Observation controls">
       <div class="panel-intro">
         <p class="panel-kicker">Northeast India</p>
-        <h1>Daily flood extent</h1>
-        <p>{product === 'flood' ? 'Observed surface classifications, 12–30 June 2022.' : 'Terra MODIS false-color imagery, 12–30 June 2022.'}</p>
+        <h1>{product === 'combined' ? 'Flood playback' : product === 'flood' ? 'Daily flood extent' : 'Satellite imagery'}</h1>
+        <p>{product === 'combined' ? 'Combined observations with generated transitions, 12–30 June 2022.' : product === 'flood' ? 'Observed surface classifications, 12–30 June 2022.' : 'Terra MODIS false-color imagery, 12–30 June 2022.'}</p>
       </div>
 
       <label class="control-label" for="region">Area</label>
@@ -143,13 +154,15 @@
 
       <button class="layers-toggle" type="button" aria-expanded={layersOpen} on:click={() => layersOpen = !layersOpen}>Layers &amp; legend <span aria-hidden="true">{layersOpen ? '−' : '+'}</span></button>
       {#if product === 'flood'}<p class="coverage-cue"><i aria-hidden="true"></i>Gray map areas: insufficient observations</p>{/if}
+      {#if product === 'combined'}<p class="derived-cue">Derived imagery · gaps filled up to 2 days</p>{/if}
 
         <div class:collapsed={!layersOpen} class="layer-controls">
           <fieldset class="product-switch">
             <legend>Layer</legend>
             <div class="product-buttons">
-              <button class:active={product === 'flood'} type="button" aria-pressed={product === 'flood'} on:click={() => product = 'flood'}>Flood extent</button>
-              <button class:active={product === 'satellite'} type="button" aria-pressed={product === 'satellite'} on:click={() => product = 'satellite'}>Satellite imagery</button>
+              <button class="combined-button" class:active={product === 'combined'} type="button" aria-pressed={product === 'combined'} on:click={() => selectProduct('combined')}>Combined playback</button>
+              <button class:active={product === 'flood'} type="button" aria-pressed={product === 'flood'} on:click={() => selectProduct('flood')}>Original observations</button>
+              <button class:active={product === 'satellite'} type="button" aria-pressed={product === 'satellite'} on:click={() => selectProduct('satellite')}>Satellite imagery</button>
             </div>
           </fieldset>
 
@@ -159,14 +172,14 @@
           </label>
           <input id="opacity" type="range" min="0.2" max="1" step="0.1" bind:value={opacity} aria-label="Layer opacity" />
 
-          <div class="legend" aria-label={product === 'flood' ? 'Flood extent legend' : 'Satellite imagery explanation'}>
-            {#if product === 'flood'}
-              <p>3-day observation window</p>
+          <div class="legend" aria-label={product !== 'satellite' ? 'Flood extent legend' : 'Satellite imagery explanation'}>
+            {#if product !== 'satellite'}
+              <p>{product === 'combined' ? 'Colors blend during generated transitions' : '3-day observation window'}</p>
               <ul>
                 <li><i class="flood" aria-hidden="true"></i>Flood</li>
                 <li><i class="recurring" aria-hidden="true"></i>Recurring flood</li>
                 <li><i class="water" aria-hidden="true"></i>Surface water</li>
-                <li><i class="data-gap" aria-hidden="true"></i>Insufficient data</li>
+                <li><i class="data-gap" class:hatched={product === 'combined'} aria-hidden="true"></i>{product === 'combined' ? 'Unresolved gap' : 'Insufficient data'}</li>
               </ul>
             {:else}
               <p>False color 7-2-1</p>
@@ -177,7 +190,10 @@
           <details class="source-note" bind:open={sourceOpen}>
             <summary>Source and coverage</summary>
             <div>
-              {#if product === 'flood'}
+              {#if product === 'combined'}
+                <p>Each day preserves valid NASA observations and fills missing pixels from the latest valid observation within the preceding two days. Generated 6-hour frames blend adjacent combined images. These transitions show visual continuity, not measured flood motion or water depth. Source age is preserved in the downloadable sequence manifest.</p>
+                <a href="/observations/assam-june-2022/manifest.json" target="_blank" rel="noreferrer">Sequence and provenance</a>
+              {:else if product === 'flood'}
                 <p>Cloud and incomplete swaths can leave areas unclassified. Dates show daily map layers; flood classes use a 3-day MODIS observation window.</p>
               {:else}
                 <p>Cloud and incomplete swaths can obscure the surface. Dates show daily Terra MODIS false-color imagery.</p>
@@ -193,7 +209,7 @@
     {#if status.phase === 'loading'}
       <div class="map-status loading" role="status" aria-live="polite">
         <span class="status-orbit" aria-hidden="true"></span>
-        <span>Requesting {formatDate(requestedDate)}</span>
+        <span>{shownDate ? 'Buffering' : 'Loading'} {formatDate(requestedDate)}</span>
         {#if shownDate}<small>Last loaded {formatDate(shownDate)}</small>{/if}
       </div>
     {:else if status.phase === 'error'}
@@ -208,16 +224,16 @@
       <div class="timeline-readout">
         <span>Requested</span>
         <strong>{formatDate(requestedDate)}</strong>
-        {#if currentFrameReady}<small>Observed</small>{:else if shownDate}<small>Last loaded {formatDate(shownDate)}</small>{/if}
+        {#if currentFrameReady}<small>{product === 'combined' ? (requestedIndex % 4 === 0 ? 'Derived · combined observations' : 'Derived · interpolated frame') : 'Observed'}</small>{:else if shownDate}<small>Last loaded {formatDate(shownDate)}</small>{/if}
       </div>
       <div class="timeline-track">
-        <input type="range" min="0" max={DATES.length - 1} step="1" value={requestedIndex} on:input={(event) => setDate(Number((event.currentTarget as HTMLInputElement).value))} aria-label="Observation date" />
+        <input type="range" min="0" max={activeDates.length - 1} step="1" value={requestedIndex} on:input={(event) => setDate(Number((event.currentTarget as HTMLInputElement).value))} aria-label="Observation date" />
         <div class="timeline-labels" aria-hidden="true"><span>Jun 12</span><span>Jun 18</span><span>Jun 24</span><span>Jun 30</span></div>
       </div>
       <div class="timeline-actions">
         <button type="button" on:click={() => setDate(requestedIndex - 1)} disabled={requestedIndex === 0} aria-label="Previous observation">←</button>
         <button class="play-button" type="button" on:click={togglePlayback} disabled={status.phase === 'error'} aria-label={playing ? 'Pause playback' : 'Play daily observations'}>{playing ? 'Pause' : 'Play'}</button>
-        <button type="button" on:click={() => setDate(requestedIndex + 1)} disabled={requestedIndex === DATES.length - 1} aria-label="Next observation">→</button>
+        <button type="button" on:click={() => setDate(requestedIndex + 1)} disabled={requestedIndex === activeDates.length - 1} aria-label="Next observation">→</button>
         <label class="speed-select"><span class="visually-hidden">Playback speed</span><select value={intervalMs} on:change={(event) => { intervalMs = Number((event.currentTarget as HTMLSelectElement).value) as typeof intervalMs; scheduleNext(); }}>
           {#each speeds as speed}<option value={speed.value}>{speed.label}</option>{/each}
         </select></label>

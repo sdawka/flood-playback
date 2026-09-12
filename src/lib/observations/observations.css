@@ -52,6 +52,7 @@
 .product-switch { border: 0; padding: 0; margin: 15px 0; }
 .product-switch legend { color: #385063; font-size: 12px; font-weight: 650; padding: 0; margin-bottom: 6px; }
 .product-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: #c4d1d9; }
+.product-buttons .combined-button{grid-column:1/-1}.derived-cue{font-size:11px;line-height:1.5;color:#42657a;padding:8px 0;margin:4px 0 0;border-top:1px solid var(--line)}.legend .data-gap.hatched{background:repeating-linear-gradient(45deg,#fff 0 2px,#aab9c2 2px 3px)}
 .product-switch button { min-height: 36px; border: 0; border-radius: 0; padding: 7px 8px; color: #405a6c; background: #f8fbfc; cursor: pointer; font-size: 11px; font-weight: 620; }
 .product-switch button.active { color: #fff; background: var(--navy); }
 .product-switch button:focus-visible, .map-panel select:focus-visible, .timeline-footer button:focus-visible, .timeline-footer select:focus-visible, .source-note summary:focus-visible, .reset-button:focus-visible { outline: 3px solid #32d2f5; outline-offset: 2px; }
