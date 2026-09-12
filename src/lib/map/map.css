@@ -1,0 +1,18 @@
+@import 'maplibre-gl/dist/maplibre-gl.css';
+
+.flood-map {
+  min-height: 30rem;
+  width: 100%;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 1rem 2.5rem rgb(7 29 50 / 20%);
+}
+
+.map-shell:focus-within .flood-map {
+  outline: 3px solid #0d4d75;
+  outline-offset: 3px;
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 0.7rem;
+}

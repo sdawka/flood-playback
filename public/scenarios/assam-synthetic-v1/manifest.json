@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "assam-synthetic-v1",
+  "version": "1.0.0",
+  "title": "Assam synthetic flood playback",
+  "status": "synthetic",
+  "disclosure": "Synthetic scenario—not observed or forecast",
+  "attribution": [
+    "Deterministic hand-authored demo fixture; production terrain derivatives are not published."
+  ],
+  "depth": {
+    "unit": "m",
+    "scale": 0.01,
+    "noData": -1,
+    "wetThreshold": 0.01
+  },
+  "timestamps": [
+    { "time": "2026-06-01T00:00:00Z", "frame": "000", "exact": true },
+    { "time": "2026-06-01T06:00:00Z", "frame": "001", "exact": true },
+    { "time": "2026-06-01T12:00:00Z", "frame": "002", "exact": true },
+    { "time": "2026-06-01T18:00:00Z", "frame": "003", "exact": true },
+    { "time": "2026-06-02T00:00:00Z", "frame": "004", "exact": true },
+    { "time": "2026-06-02T06:00:00Z", "frame": "005", "exact": true },
+    { "time": "2026-06-02T12:00:00Z", "frame": "006", "exact": true },
+    { "time": "2026-06-02T18:00:00Z", "frame": "007", "exact": true }
+  ],
+  "regions": [
+    {
+      "id": "assam",
+      "label": "Assam demo area",
+      "bounds": [91, 26, 92, 27],
+      "minZoom": 7,
+      "maxZoom": 7,
+      "depthTiles": "/scenarios/assam-synthetic-v1/tiles/depth/{frame}/{z}/{x}/{y}.png",
+      "displayTiles": "/scenarios/assam-synthetic-v1/tiles/display/{frame}/{z}/{x}/{y}.png",
+      "terrainTiles": "/scenarios/assam-synthetic-v1/tiles/terrain/{z}/{x}/{y}.png"
+    }
+  ],
+  "gaps": []
+}

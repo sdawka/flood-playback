@@ -1,0 +1,88 @@
+{
+  "source": "hand-authored deterministic fallback; no acquired DEM/WBM values",
+  "frames": [
+    {
+      "frame": "000",
+      "time": "2026-06-01T00:00:00Z",
+      "minimum": 0.0,
+      "maximum": 0.10000000149011612,
+      "wetCells": 1,
+      "wetArea": 1,
+      "tileCount": 1
+    },
+    {
+      "frame": "001",
+      "time": "2026-06-01T06:00:00Z",
+      "minimum": 0.0,
+      "maximum": 0.25,
+      "wetCells": 1,
+      "wetArea": 1,
+      "tileCount": 1
+    },
+    {
+      "frame": "002",
+      "time": "2026-06-01T12:00:00Z",
+      "minimum": 0.0,
+      "maximum": 0.550000011920929,
+      "wetCells": 1,
+      "wetArea": 1,
+      "tileCount": 1
+    },
+    {
+      "frame": "003",
+      "time": "2026-06-01T18:00:00Z",
+      "minimum": 0.0,
+      "maximum": 0.8999999761581421,
+      "wetCells": 1,
+      "wetArea": 1,
+      "tileCount": 1
+    },
+    {
+      "frame": "004",
+      "time": "2026-06-02T00:00:00Z",
+      "minimum": 0.0,
+      "maximum": 1.100000023841858,
+      "wetCells": 4,
+      "wetArea": 4,
+      "tileCount": 1
+    },
+    {
+      "frame": "005",
+      "time": "2026-06-02T06:00:00Z",
+      "minimum": 0.0,
+      "maximum": 0.8500000238418579,
+      "wetCells": 1,
+      "wetArea": 1,
+      "tileCount": 1
+    },
+    {
+      "frame": "006",
+      "time": "2026-06-02T12:00:00Z",
+      "minimum": 0.0,
+      "maximum": 0.5,
+      "wetCells": 1,
+      "wetArea": 1,
+      "tileCount": 1
+    },
+    {
+      "frame": "007",
+      "time": "2026-06-02T18:00:00Z",
+      "minimum": 0.0,
+      "maximum": 0.18000000715255737,
+      "wetCells": 1,
+      "wetArea": 1,
+      "tileCount": 1
+    }
+  ],
+  "tileHashes": [
+    "12976479c138a3bf9da6622a38669f5c2025a9276979fcfd6902514c26709be0",
+    "2ec83b1d5ee245497068095d5389cb8e76992e236c4e665fd1422285a36d593e",
+    "5c246589f68b215b4694113275f6b03aefffdc7629775832866cf4d4f9a0dfe8",
+    "be82fd00e96d5e3eb1fbfc4f7583071c4dbde95f74aa4143267dec4be292735a",
+    "b3023ada2733b020ca0860c4ba486e41667b02fb9074404ad94b86cfbf1c892b",
+    "41aeabce2b7b5701d7e5150f9388178d5d195c6bab5d761d1d384ae0a3325aaa",
+    "0e71cdf561f47e625e8c89c662d2900fc1bed081c48cb58460ec42bec422999d",
+    "55c46fe444f7233dafe20fe187e7bd6f80681b75ff75e169e78eb30a99bc9e74",
+    "bced33c2c2debfcdb8927f735b60965f1cda518699807d422d7831ae63ff01eb"
+  ]
+}

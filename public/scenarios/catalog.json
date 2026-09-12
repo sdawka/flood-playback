@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "scenarios": [
+    {
+      "id": "assam-synthetic-v1",
+      "manifest": "/scenarios/assam-synthetic-v1/manifest.json"
+    }
+  ]
+}
