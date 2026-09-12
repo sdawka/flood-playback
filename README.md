@@ -1,8 +1,18 @@
 # Flood Playback
 
-An early flood-depth playback viewer for Northeast India. It renders timestamped raster snapshots over real geography, interpolates between frames, supports point inspection, and offers optional 3D terrain.
+Explore satellite-observed flooding in Assam and nearby northeast India during June 2022. The default viewer loads NASA GIBS MODIS flood classifications and false-color satellite imagery, with daily playback, region navigation, and layer opacity controls.
 
-The included Assam scenario is a deterministic synthetic fixture. It is not an observation, forecast, or calibrated hydraulic simulation.
+Flood imagery uses a rolling three-day observation window. These are categorical observations, not water-depth measurements or a forecast. Clouds and insufficient observations can hide water; transparent imagery must not be interpreted as dry land. Playback steps through dated imagery without interpolating classes.
+
+The older synthetic depth demonstration remains available at `/?demo=synthetic` for testing the depth-raster pipeline. It is not the default viewer.
+
+## Imagery
+
+- [NASA GIBS](https://nasa-gibs.github.io/gibs-api-docs/): MODIS Terra + Aqua three-day flood product and Terra corrected reflectance bands 7-2-1, delivered as Web Mercator WMTS tiles.
+- [NASA flood classifications](https://gibs.earthdata.nasa.gov/colormaps/v1.3/output/MODIS_Flood.html) and [June 2022 event context](https://science.nasa.gov/earth/earth-observatory/floods-swamp-bangladesh-150014/).
+- Geographic basemap: OpenFreeMap, OpenMapTiles, and OpenStreetMap contributors.
+
+We acknowledge imagery provided by NASA's Global Imagery Browse Services (GIBS), part of its Earth Science Data and Information System (ESDIS). An internet connection is required to load imagery and basemap tiles.
 
 ## Run locally
 

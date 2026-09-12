@@ -11,7 +11,7 @@ test('loads vector geography through the worker and advances actual flood frames
   const failures: string[] = [];
   page.on('pageerror', error => failures.push(error.message));
   page.on('requestfailed', request => failures.push(request.url()));
-  await page.goto('/');
+  await page.goto('/?demo=synthetic');
   await expect(page.getByRole('button', { name: 'Inspect map center' })).toBeEnabled();
   const nextTile = page.waitForResponse(response => response.url().includes('/display/001/') && response.ok());
   await page.getByRole('button', { name: 'Play playback' }).click();
@@ -28,7 +28,7 @@ test('loads vector geography through the worker and advances actual flood frames
 
 test('offers retry when the basemap fails before map load', async ({ page }) => {
   await page.route('https://tiles.openfreemap.org/**', route => route.fulfill({ status: 503, body: 'Unavailable' }));
-  await page.goto('/');
+  await page.goto('/?demo=synthetic');
   await expect(page.getByText('Map unavailable', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Retry map' })).toBeVisible();
 });

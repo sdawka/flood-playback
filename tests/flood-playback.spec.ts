@@ -25,7 +25,7 @@ test('renders the tracked wet-depth tile as a visible deterministic overlay', as
   page.on('requestfailed', (request) => consoleErrors.push(`request failed: ${request.url()}`));
   await fixtureMapWithTrackedTiles(page);
   const visibleTile = page.waitForResponse('**/scenarios/assam-synthetic-v1/tiles/display/000/7/96/54.png');
-  await page.goto('/');
+  await page.goto('/?demo=synthetic');
   await visibleTile;
   const canvas = page.locator('.maplibregl-canvas');
   await expect(canvas).toBeVisible();
@@ -37,7 +37,7 @@ test('renders the tracked wet-depth tile as a visible deterministic overlay', as
 test('plays, scrubs, and preserves a sampled depth across 3D terrain', async ({ page }) => {
   await fixtureMap(page);
   const firstVisibleTile = page.waitForResponse('**/scenarios/assam-synthetic-v1/tiles/depth/000/7/96/54.png');
-  await page.goto('/');
+  await page.goto('/?demo=synthetic');
 
   await expect(page.getByText('Synthetic scenario—not observed or forecast')).toBeVisible();
   await firstVisibleTile;
@@ -63,7 +63,7 @@ test('discloses a visible missing flood tile without reporting dry depth', async
   await fixtureMap(page);
   await page.route('**/scenarios/assam-synthetic-v1/tiles/depth/**', (route) => route.fulfill({ status: 404 }));
   await page.route('**/scenarios/assam-synthetic-v1/tiles/display/**', (route) => route.fulfill({ status: 404 }));
-  await page.goto('/');
+  await page.goto('/?demo=synthetic');
 
   await expect(page.getByText('Synthetic scenario—not observed or forecast')).toBeVisible();
   await expect(page.locator('.maplibregl-canvas')).toBeVisible();
