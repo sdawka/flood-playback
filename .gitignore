@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+.vitest/
+test-results/
+playwright-report/
+.DS_Store
+.worktrees/
+.superpowers/
+data/raw/
+public/scenarios/*/tiles/
